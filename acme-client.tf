@@ -1,29 +1,3 @@
-variable "ami_id" {
-  default     = "ami-01938df366ac2d954"
-  description = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305"
-}
-
-variable "security_group_ids" {
-  default = ["sg-0ff54ca1daf21dc48"]
-}
-
-variable "subnet_id" {
-  default = "subnet-050239ff37c785c2a"
-}
-
-variable "ca_cert" {
-  default = ""
-}
-
-variable "top_level_domain_name" {
-  default = "localhost"
-}
-
-variable "acme_client_dns" {
-  default     = "acmeweb.localhost"
-  description = "DNS should be the same top_level_domain_name"
-}
-
 resource "aws_eip" "acme_public" {
   domain   = "vpc"
   instance = aws_instance.acme_server.id

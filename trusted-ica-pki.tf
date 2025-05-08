@@ -52,7 +52,7 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "csr_request" {
   common_name = "Demo Vault Trusted ICA Intermediate Authority"
   # If type = internal, a new private key will always be created
   type        = "internal"
-  uri_sans    = ["localhost", "example.com"]
+  uri_sans    = ["localhost", "example.com", var.top_level_domain_name]
   # If type = existing, you can reference an existing private key to create the CSR
   #  type        = "existing"
   #  key_ref     = "32523adb-e37b-aa35-8c8f-3fa2c6a0d1e2"
@@ -83,7 +83,7 @@ resource "vault_pki_secret_backend_role" "trusted_ica_role" {
   name             = "vault-trusted-ica-demo-role"
   ttl              = 86400
   allow_ip_sans    = true
-  allowed_domains  = ["localhost", "example.com"]
+  allowed_domains  = ["localhost", "example.com", var.top_level_domain_name]
   allow_subdomains = true
   key_type         = "any"
 }

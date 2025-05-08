@@ -4,15 +4,45 @@ variable "vault_addr" {
 }
 
 variable "ca_private_key_abs_path" {
-  type    = string
-  default = "/Users/kz.li/Projects/vault/terraform-aws-vault-enterprise-hvd/init/tmp/ca.key"
+  type = string
 }
 
 variable "ca_cert_abs_path" {
   type    = string
-  default = "/Users/kz.li/Projects/vault/terraform-aws-vault-enterprise-hvd/init/tmp/ca.cert"
 }
 
 variable "region" {
   default = "ap-southeast-1"
+}
+
+variable "ami_id" {
+  default     = "ami-01938df366ac2d954"
+  description = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20250305"
+}
+
+variable "security_group_ids" {
+  description = "Security group to deploy the servers into (you can retrieve this from the hvd module)"
+}
+
+variable "subnet_id" {
+  description = "Subnet to deploy the servers into (you can retrieve this from the hvd module)"
+}
+
+variable "ca_cert" {
+  description = "Offline root CA cert"
+}
+
+variable "top_level_domain_name" {
+  default     = "localhost"
+  description = "Top level domain name"
+}
+
+variable "acme_client_dns" {
+  default     = "acmeweb.localhost"
+  description = "Domain Name for ACME server. DNS should be the same top_level_domain_name."
+}
+
+variable "agent_client_dns" {
+  default     = "agentweb.localhost"
+  description = "Domain Name for Agent server. DNS should be the same top_level_domain_name."
 }

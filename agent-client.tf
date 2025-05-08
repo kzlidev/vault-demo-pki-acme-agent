@@ -1,7 +1,3 @@
-variable "agent_client_dns" {
-  default = "agentweb.localhost"
-}
-
 resource "aws_eip" "agent_public" {
   domain   = "vpc"
   instance = aws_instance.agent_server.id
