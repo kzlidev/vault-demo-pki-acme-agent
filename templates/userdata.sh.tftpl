@@ -1,0 +1,40 @@
+#! /bin/bash
+set -xeuo pipefail
+
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+apt update && sudo apt install vault
+
+apt-get install -y ca-certificates
+cat >> /usr/local/share/ca-certificates/vault-ca.crt<< EOF
+${ca_cert}
+EOF
+update-ca-certificates
+
+apt install -y nginx
+apt install -y certbot
+apt-get install -y python3-certbot-nginx
+
+# Once authenticated, certbot wil cache the EAB information and ignore new credentials going forward until the cache is manually deleted
+#certbot certonly --nginx \
+#  --non-interactive \
+#  --agree-tos \
+#  --email test@example.com \
+#  --server "${acme_server_directory}" \
+#  --eab-kid "${eab_kid}" \
+#  --eab-hmac-key "${eab_hmac_key}" \
+#  -d "${client_name}"
+#
+#cat >> /etc/nginx/sites-available/default<< EOF
+#server {
+#    listen 443 ssl;
+#    server_name ${client_name};
+#
+#    ssl_certificate /etc/letsencrypt/live/${client_name}/fullchain.pem;
+#    ssl_certificate_key /etc/letsencrypt/live/${client_name}/privkey.pem;
+#}
+#EOF
+
+# certbot renew
+
+systemctl restart nginx

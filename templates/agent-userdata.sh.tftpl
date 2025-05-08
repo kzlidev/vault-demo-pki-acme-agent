@@ -1,0 +1,52 @@
+#! /bin/bash
+set -xeuo pipefail
+export VAULT_ADDR=${vault_addr}
+
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+apt update && sudo apt install vault
+
+apt-get install -y ca-certificates
+cat >> /usr/local/share/ca-certificates/vault-ca.crt<< EOF
+${ca_cert}
+EOF
+update-ca-certificates
+
+apt install -y nginx jq
+
+export VAULT_TOKEN=$(vault write auth/approle/login \
+    role_id=${approle_roleid} \
+    secret_id=${approle_secretid} \
+    --format=json | jq -r .auth.client_token)
+cat >> /home/ubuntu/roleid<< EOF
+${approle_roleid}
+EOF
+cat >> /home/ubuntu/secretid<< EOF
+${approle_secretid}
+EOF
+
+
+vault write -format=json agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role \
+    ttl=86400 \
+    common_name=${client_name} > cert.json
+jq -r .data.certificate < cert.json > /home/ubuntu/cert.pem
+jq -r .data.ca_chain[0] < cert.json >> /home/ubuntu/cert.pem
+jq -r .data.private_key < cert.json > /home/ubuntu/cert.key
+
+cat >> /etc/nginx/sites-available/default<< EOF
+server {
+    listen 443 ssl;
+    server_name ${client_name};
+
+    ssl_certificate /home/ubuntu/cert.pem;
+    ssl_certificate_key /home/ubuntu/cert.key;
+}
+EOF
+
+cat >> /home/ubuntu/agent.hcl<< EOF
+${agent_config}
+EOF
+
+vault agent -config /home/ubuntu/agent.hcl
+
+systemctl restart nginx

@@ -1,0 +1,58 @@
+exit_after_auth = false
+pid_file = "./pidfile"
+
+vault {
+  address = "${vault_addr}"
+  retry {
+    num_retries = 5
+  }
+}
+
+auto_auth {
+   method "approle" {
+       mount_path = "auth/approle"
+       config = {
+           role_id_file_path = "/home/ubuntu/roleid"
+           secret_id_file_path = "/home/ubuntu/secretid"
+           remove_secret_id_file_after_reading = false
+       }
+   }
+
+  sink {
+    type = "file"
+    config = {
+      path = "./agent-token"
+    }
+  }
+}
+
+cache {
+  use_auto_auth_token = true
+}
+
+listener "tcp" {
+  address = "127.0.0.1:8100"
+  tls_disable = true
+}
+
+template {
+  contents=<<EOF
+{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=86400"}}
+{{- .Data.private_key }}
+{{- end }}
+  EOF
+  destination = "/home/ubuntu/cert.key"
+}
+
+template {
+  contents=<<EOF
+{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=86400"}}
+{{- .Data.certificate }}
+{{- range .Data.ca_chain }}
+{{ . }}
+{{- end }}
+{{- end }}
+  EOF
+  destination = "/home/ubuntu/cert.pem"
+  command="nginx -s reload"
+}
