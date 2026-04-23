@@ -37,7 +37,7 @@ listener "tcp" {
 
 template {
   contents=<<EOF
-{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=86400"}}
+{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=60"}}
 {{- .Data.private_key }}
 {{- end }}
   EOF
@@ -46,7 +46,7 @@ template {
 
 template {
   contents=<<EOF
-{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=86400"}}
+{{- with secret "agent-pki-trusted-ica/issue/agent-vault-trusted-ica-demo-role" "common_name=${client_name}" "ttl=60"}}
 {{- .Data.certificate }}
 {{- range .Data.ca_chain }}
 {{ . }}

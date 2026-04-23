@@ -1,6 +1,6 @@
 locals {
   trusted_uca_csr_request_path = "${path.module}/tmp/trusted-ica.csr"
-  mount_point_name             = "pki-trusted-ica"
+  mount_point_name             = "acme-trusted-ica"
 }
 
 # 1. Create mounted ICA Path
@@ -81,7 +81,7 @@ resource "vault_pki_secret_backend_config_issuers" "config" {
 resource "vault_pki_secret_backend_role" "trusted_ica_role" {
   backend          = vault_mount.trusted_ica.path
   name             = "vault-trusted-ica-demo-role"
-  ttl              = 86400
+  ttl              = 60
   allow_ip_sans    = true
   allowed_domains  = ["localhost", "example.com", var.top_level_domain_name]
   allow_subdomains = true
